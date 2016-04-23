@@ -1,0 +1,54 @@
+.dvTop {
+	height: 100px;
+	background-image: url(images/bg_top.jpg);
+	background-repeat:no-repeat;
+	background-color: #F3EFEE;
+}
+.dvStatus {
+	height: 25px;
+}
+.dvLayer {
+	height: 25px;
+	background-image:url(images/status_line.jpg);
+	background-repeat:repeat-x;
+}
+.dvMenu {
+	height: 700px;
+	width: 200px;
+	float:left;
+	border:1px solid #D6D4D4;
+}
+.dvBody {
+	height:700px;
+	border:1px solid #D6D4D4;
+
+}
+.dvFooter {
+	height: 60px;
+	width: 1000px;
+}
+
+.style10 {color: #0000CC}
+.style4 {font-family: verdana; font-size: 11px; }
+.style9 {font-family: verdana}
+.style11 {	color: #FF0000;
+	font-weight: bold;
+}
+.style5 {	font-family: Tahoma;
+	font-size: 12px;
+}
+.textBox {
+	color: #999999; 
+	border: solid; 
+	border-width: 1px; 
+	width:270px; 
+	height:20px;
+}
+
+.selectBox {
+	color: #999999; 
+	border: solid; 
+	border-width: 1px; 
+	width:272px; 
+	height:25px;
+}

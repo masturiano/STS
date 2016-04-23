@@ -1,0 +1,227 @@
+<?
+$now = date('Y-m-d H:i:s');
+ini_set("date.timezone","Asia/Manila");
+class accrualObj extends commonObj {
+	
+	function accrualDtl($dtFrom){
+	
+			$curFirstDay = date("Y/m/d", strtotime($dtFrom));
+			$curLastDay = date("Y/m/d", strtotime('-1 second',strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00'))));
+			
+			$nextMonth = date("Y/m/d", strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00')));
+
+			$sql = "
+			SELECT     
+			dbo.tblStsDlyApHist.*, 
+			dbo.tblStsHierarchy.glMajor AS glMajor, 
+			dbo.tblStsHierarchy.glMinor AS glMinor
+			FROM         
+			dbo.tblStsDlyApHist 
+			INNER JOIN
+            dbo.tblStsHierarchy ON dbo.tblStsDlyApHist.stsDept = dbo.tblStsHierarchy.stsDept 
+			AND dbo.tblStsDlyApHist.stsCls = dbo.tblStsHierarchy.stsCls 
+			AND dbo.tblStsDlyApHist.stsSubCls = dbo.tblStsHierarchy.stsSubCls
+			WHERE     
+			(dbo.tblStsDlyApHist.stsApplyDate BETWEEN '{$curFirstDay}' AND '{$curLastDay}') AND (dbo.tblStsDlyApHist.uploadDate >= '{$nextMonth}')
+			order by stsRefno,stsNo,stsSeq,strCode,suppCode,stsApplyAmt
+			";
+			
+		return $this->getArrRes($this->execQry($sql));
+	}
+	
+	function checkAccruMonth($dateMY){
+			$sql="
+				SELECT     *
+				FROM         tblStsAccrualMonth
+				where accruMonth = '{$dateMY}'
+			";
+			return $this->execQry($sql);
+	}
+	
+	function insertTxtFile($dtFrom){
+	
+			$curFirstDay = date("Y/m/d", strtotime($dtFrom));
+			$curLastDay = date("Y/m/d", strtotime('-1 second',strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00'))));
+			
+			$nextMonth = date("Y/m/d", strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00')));
+			
+			$sql="
+			insert into tblStsAccrualTemp(stsNo,stsSeq,stsRefno,compCode,strCode,suppCode,stsType,stsDept,stsCls,stsSubCls,grpCode,stsApplyAmt,stsApplyDate,stsActualDate,
+			stsPaymentMode,uploadDate,uploadApRef,uploadApFile,status,apBatch,stsRemarks,glMajor,glMinor)
+			SELECT     
+			dbo.tblStsDlyApHist.stsNo,dbo.tblStsDlyApHist.stsSeq,dbo.tblStsDlyApHist.stsRefno,dbo.tblStsDlyApHist.compCode,dbo.tblStsDlyApHist.strCode,dbo.tblStsDlyApHist.suppCode,
+			dbo.tblStsDlyApHist.stsType,dbo.tblStsDlyApHist.stsDept,dbo.tblStsDlyApHist.stsCls,dbo.tblStsDlyApHist.stsSubCls,dbo.tblStsDlyApHist.grpCode,dbo.tblStsDlyApHist.stsApplyAmt,
+			dbo.tblStsDlyApHist.stsApplyDate,dbo.tblStsDlyApHist.stsActualDate,
+			dbo.tblStsDlyApHist.stsPaymentMode,dbo.tblStsDlyApHist.uploadDate,dbo.tblStsDlyApHist.uploadApRef,dbo.tblStsDlyApHist.uploadApFile,dbo.tblStsDlyApHist.status,
+			dbo.tblStsDlyApHist.apBatch,dbo.tblStsDlyApHist.stsRemarks,
+			dbo.tblStsHierarchy.glMajor AS glMajor, 
+			dbo.tblStsHierarchy.glMinor AS glMinor
+			FROM         
+			dbo.tblStsDlyApHist 
+			INNER JOIN
+            dbo.tblStsHierarchy ON dbo.tblStsDlyApHist.stsDept = dbo.tblStsHierarchy.stsDept 
+			AND dbo.tblStsDlyApHist.stsCls = dbo.tblStsHierarchy.stsCls 
+			AND dbo.tblStsDlyApHist.stsSubCls = dbo.tblStsHierarchy.stsSubCls
+			WHERE     
+			(dbo.tblStsDlyApHist.stsApplyDate BETWEEN '{$curFirstDay}' AND '{$curLastDay}') AND (dbo.tblStsDlyApHist.uploadDate >= '{$nextMonth}')
+			order by stsRefno,stsNo,stsSeq,strCode,suppCode,stsApplyAmt
+			";
+		return $this->execQry($sql);
+	}
+	
+	function getTxtFileName($dtFrom){
+	
+			$curFirstDay = date("Y/m/d", strtotime($dtFrom));
+			$curLastDay = date("Y/m/d", strtotime('-1 second',strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00'))));
+			
+			$nextMonth = date("Y/m/d", strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00')));
+			
+			$sql="
+			SELECT     
+			DISTINCT dbo.tblStsDlyApHist.compCode
+			FROM         
+			dbo.tblStsDlyApHist 
+			INNER JOIN
+            dbo.tblStsHierarchy ON dbo.tblStsDlyApHist.stsDept = dbo.tblStsHierarchy.stsDept 
+			AND dbo.tblStsDlyApHist.stsCls = dbo.tblStsHierarchy.stsCls 
+			AND dbo.tblStsDlyApHist.stsSubCls = dbo.tblStsHierarchy.stsSubCls
+			WHERE     
+			(dbo.tblStsDlyApHist.stsApplyDate BETWEEN '{$curFirstDay}' AND '{$curLastDay}') AND (dbo.tblStsDlyApHist.uploadDate >= '{$nextMonth}')
+			";
+		return $this->getArrRes($this->execQry($sql));
+	}
+	
+	function getTxtFileContents($dtFrom){
+	
+			$curFirstDay = date("Y/m/d", strtotime($dtFrom));
+			$curLastDay = date("Y/m/d", strtotime('-1 second',strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00'))));
+			
+			$nextMonth = date("Y/m/d", strtotime('+1 month',strtotime(date('m',strtotime($dtFrom)).'/01/'.date('Y',strtotime($dtFrom)).' 00:00:00')));
+			
+			$sql="
+			SELECT     
+			dbo.tblStsDlyApHist.stsNo,dbo.tblStsDlyApHist.stsSeq,dbo.tblStsDlyApHist.stsRefno,dbo.tblStsDlyApHist.compCode,dbo.tblStsDlyApHist.strCode,dbo.tblStsDlyApHist.suppCode,
+			dbo.tblStsDlyApHist.stsType,dbo.tblStsDlyApHist.stsDept,dbo.tblStsDlyApHist.stsCls,dbo.tblStsDlyApHist.stsSubCls,dbo.tblStsDlyApHist.grpCode,dbo.tblStsDlyApHist.stsApplyAmt,
+			dbo.tblStsDlyApHist.stsApplyDate,dbo.tblStsDlyApHist.stsActualDate,
+			dbo.tblStsDlyApHist.stsPaymentMode,dbo.tblStsDlyApHist.uploadDate,dbo.tblStsDlyApHist.uploadApRef,dbo.tblStsDlyApHist.uploadApFile,dbo.tblStsDlyApHist.status,
+			dbo.tblStsDlyApHist.apBatch,dbo.tblStsDlyApHist.stsRemarks,
+			dbo.tblStsHierarchy.glMajor AS glMajor, 
+			dbo.tblStsHierarchy.glMinor AS glMinor
+			FROM         
+			dbo.tblStsDlyApHist 
+			INNER JOIN
+            dbo.tblStsHierarchy ON dbo.tblStsDlyApHist.stsDept = dbo.tblStsHierarchy.stsDept 
+			AND dbo.tblStsDlyApHist.stsCls = dbo.tblStsHierarchy.stsCls 
+			AND dbo.tblStsDlyApHist.stsSubCls = dbo.tblStsHierarchy.stsSubCls
+			WHERE     
+			(dbo.tblStsDlyApHist.stsApplyDate BETWEEN '{$curFirstDay}' AND '{$curLastDay}') AND (dbo.tblStsDlyApHist.uploadDate >= '{$nextMonth}')
+			order by stsRefno,stsNo,stsSeq,strCode,suppCode,stsApplyAmt
+			";
+		return $this->getArrRes($this->execQry($sql));
+	}
+	
+	function insertAccruMonth($dtFrom) {
+			$sql="
+				insert into tblStsAccrualMonth values('{$dtFrom}')
+			";
+			return $this->execQry($sql);
+	}
+	
+	function getStoreDtl($store) {
+			$sql="
+				SELECT     brnShortName,businessLine
+				FROM         tblBranches
+				WHERE     (strCode = '{$store}')
+			";
+			return $this->getSqlAssoc($this->execQry($sql));
+	}
+	
+	function createTxtFile($dtFrom) {
+	
+			$arrFileName = $this->getTxtFileName($dtFrom);
+			
+			//foreach($arrFileName as $valFileName){
+				
+				//$fileName = $valFileName['filename'];
+				//$fileName = $valFileName['compCode'];
+				$fileNameJr = "JR";
+				
+				$this->insertAccruMonth($dtFrom);
+				$arrFileCont = $this->getTxtFileContents($dtFrom);
+				
+				$fCont = "";
+				
+				//Junior
+				foreach($arrFileCont as $valFileContJr){
+				
+					if($valFileCont['compCode']==700){
+						$fileFolder = "PGJR";
+						$fileCode = "PJ";	
+						$newCompCode = 700;
+					}elseif( ($valFileCont['compCode']>=101 && $valFileCont['compCode']<=105) || ($valFileCont['compCode']>800 && $valFileCont['compCode']<809)){
+						$fileFolder = "PPCI";
+						$fileCode = "PG";
+						$newCompCode = 101;
+						//if(($valFileCont['compCode']>800 && $valFileCont['compCode']<809)){
+						//	$newCompCode = 101;
+						//}else{
+						//	$newCompCode = $valFileCont['compCode'];
+						//}
+					}elseif($valFileCont['compCode']==809){
+						$fileFolder = "PE";
+						$fileCode = "PE";
+						$newCompCode = 809;
+					}else{
+						$fileFolder = "PC";
+						$fileCode = "PC";	
+						$newCompCode = 302;
+					}
+					
+					$storeShort = $this->getStoreDtl($valFileCont['strCode']);
+					
+					//	$trxNum = "CA".date('Mdy',strtotime($valFileCont['HDR_TRX_NUM'])).$valFileCont['description_storecode'];  ##HDR_TRX_NUM
+					//$fCont .= trim($trxNum)."|";
+					$fCont .= trim(date('d-M-Y',strtotime($valFileCont['stsApplyDate'])))."|"; 					##acctDate
+					$fCont .= trim("DEBIT")."|";					##acctType
+					$fCont .= trim($newCompCode)."|";					##compCode
+					$fCont .= trim($storeShort['brnShortName'])."|";					##storeShort
+					$fCont .= trim($storeShort['businessLine'])."|"; 				##businessLine
+					$fCont .= trim("0")."|";					##department
+					$fCont .= trim("0")."|";					##section
+					$fCont .= trim($newCompCode.$valFileCont['glMajor'].$valFileCont['glMinor'])."|"; 					##acctCode
+					$fCont .= trim($newCompCode.$valFileCont['glMajor'].$valFileCont['glMinor'])."|"; 						##acctCode
+					$fCont .= trim("0")."|";					##DTL_QUANTITY
+					$fCont .= trim("0")."|";					##DTL_VAT_CODE
+					$fCont .= "|";					##DTL_CURRENCY
+					$fCont .= trim($fileName)."|";					##journalName
+					$fCont .= trim($fileName)."|"; 						##catgryName
+					$fCont .= trim("PHP")."|"; 						##currCode
+					$fCont .= trim($valFileCont['stsApplyAmt'])."|"; 						##amount
+					$fCont .= trim($fileName)."|"; 						##sourceRef
+					$fCont .= "|"; 					##
+					$fCont .= "|"; 					##
+					$fCont .= "|"; 					##
+					$fCont .= "|"; 					##
+					$fCont .= "|"; 					##
+					$fCont .= trim($fileName)."|"; 						##fileName
+					$fCont .= "\r\n";
+				}
+				
+				$destiFoldr = "../../exportfiles/accrual/".$fileName; 
+		
+				if (file_exists($destiFoldr)) {
+					unlink($destiFoldr);
+				}
+				
+				$handleFromFileName = fopen ($destiFoldr, "x");
+				
+				fwrite($handleFromFileName, $fCont);
+				fclose($handleFromFileName) ;
+				
+				
+			//}
+	
+	}
+	
+}
+?>
